@@ -28,7 +28,7 @@ win = GTKwindow()
 
 pipelineGST = PipelineGST()
 pipelineGST.set_main_urls(
-    "rtsp://192.168.3.80:554/stream1",  # 
+    "rtsp://192.168.3.115:554/stream1",  # 
     "rtsp://192.168.3.85:554/stream1",  # 
     "rtsp://192.168.3.90:554/stream1",  # 
     "rtsp://192.168.3.95:554/stream1",  # 

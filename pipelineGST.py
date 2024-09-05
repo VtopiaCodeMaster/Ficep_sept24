@@ -11,10 +11,10 @@ from ValveIF import *
 
 class PipelineGST:
     def __init__(self):
-        self.rtspConfig = "latency=10"#50 buffer-mode=none drop-on-latency=true do-retransmission=false udp-buffer-size=212000"
+        self.rtspConfig = "latency=10 buffer-mode=none drop-on-latency=true do-retransmission=false udp-buffer-size=212000"
         self.queueConfig = "max-size-buffers=10 leaky=downstream"# max-size-bytes=0 max-size-time=0"
         self.decodePipe = f"rtph265depay ! h265parse config-interval=-1 ! nvv4l2decoder ! queue {self.queueConfig}"#disable-dpb=true
-        self.glePipe = "nvegltransform ! nveglglessink sync=false force-aspect-ratio=false qos=0"
+        self.glePipe = "nvegltransform ! nveglglessink sync=true force-aspect-ratio=false qos=0"
         self.muxConfig = "live-source=1"
 
         self.stream_IP = [80, 85, 90, 95]
