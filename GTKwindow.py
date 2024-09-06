@@ -3,7 +3,7 @@ import gi
 gi.require_version("Gtk", "3.0")
 gi.require_version("GstVideo", "1.0")
 from gi.repository import Gtk, Gdk
-
+from TouchHandler import *
 
 class GTKwindow(Gtk.Window):
     def __init__(self,every_ip):
@@ -23,8 +23,8 @@ class GTKwindow(Gtk.Window):
         self.box.set_redraw_on_allocate(False)
         # Imposta il colore di sfondo su nero
         # self.override_background_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0, 0, 0, 1))
-
         self.set_drawing_area()
+        self.touchHandler = TouchHandler(self.drawing_areas)
 
     def set_pipelines(self, pipelines):
         self.pipelines = pipelines
@@ -45,7 +45,8 @@ class GTKwindow(Gtk.Window):
         for ip in self.every_ip:
             self.on_realize(self.drawing_areas[ip], self.pipelines[ip], f"sink_{ip}")
             
-
+    def resize_drawing_area(self,height,width):
+        self.touchHandler.get_touch(height, width)
 
     def on_realize(self, widget, pipeline, sink_name):
         window = widget.get_window()
