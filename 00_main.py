@@ -10,7 +10,7 @@ from GTKwindow import *
 import argparse
 from Pipeline import *
 from HandlerFault import *
-
+from Recording import *
 exit_flag = False
 def signal_handler(sig, frame):
     exit_flag = True
@@ -26,7 +26,9 @@ def test_touch_resize():
     win.resize_drawing_area(200,400)
     print("ciao")
     time.sleep(3)
-   
+
+
+
     
     
 
@@ -51,12 +53,13 @@ win.set_pipelines(pipelines)
 
 win.show_all()
 win.connect_drawing_area()
-
+recording = Recording(80)
+recording.createPipeline()
 for ip in every_ip:
     Cam_thread=threading.Thread(target=pipes[ip].start).start()
     HandlerFault_thread=threading.Thread(target=HandlersFault_dict[ip].pipeline_started).start()
 
-threading.Thread(target=test_touch_resize).start()
+#threading.Thread(target=test_touch_resize).start()
 print("Setup finished, feeding data")
 
 Gtk.main()

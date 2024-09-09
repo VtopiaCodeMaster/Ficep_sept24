@@ -12,7 +12,7 @@ class Pipeline:
         self.url=f"rtsp://192.168.3.{self.ip}:554/stream1"
         self.rtspConfig = "latency=10 buffer-mode=none drop-on-latency=true do-retransmission=false udp-buffer-size=212000"
         self.queueConfig = (
-            "max-size-buffers=10 leaky=downstream"  # max-size-bytes=0 max-size-time=0"
+            "max-size-bytes=30000000000 leaky=downstream"  # max-size-bytes=0 max-size-time=0"
         )
         self.decodePipe = f"rtph265depay ! h265parse config-interval=-1 ! nvv4l2decoder ! queue {self.queueConfig}"  # disable-dpb=true
         self.glePipe = (
@@ -47,14 +47,22 @@ class Pipeline:
         bus = self.pipeline.get_bus()
         bus.add_signal_watch()
         bus.connect("message", self._onMessage)
+        bus.connect("message::eos", self.on_eos)
+        bus.connect("message::error", self.on_error)
         try:
             loop = GLib.MainLoop()
             loop.run()
         except KeyboardInterrupt:
             loop.quit()
     
-    def stop(self):
+    def on_eos(self, bus, msg):
+        print("End-of-stream")
         self.pipeline.set_state(Gst.State.NULL)
-        print("pipeline stopped")
+
+    def on_error(self, bus, msg):
+        err, debug = msg.parse_error()
+        print(f"Error: {err}, {debug}")
+        self.pipeline.set_state(Gst.State.NULL)
+
     
     
