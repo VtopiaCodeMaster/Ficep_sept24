@@ -9,9 +9,8 @@ class GTKwindow(Gtk.Window):
     def __init__(self,every_ip):
         super().__init__(title="Vtopia")
         self.every_ip=every_ip
-        self.set_default_size(
-            1920, 1080
-        )  # Imposta la dimensione iniziale della finestra
+        self.set_default_size(1920, 1080)  # Imposta la dimensione iniziale della finestra
+        self.DA_positions = [(0, 0), (960, 0), (0, 540), (960, 540)]  # Position for each camera feed
         self.set_decorated(False)  # Rimuove la barra del titolo
         self.move(0, 0)
         self.connect(
@@ -24,7 +23,8 @@ class GTKwindow(Gtk.Window):
         # Imposta il colore di sfondo su nero
         # self.override_background_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0, 0, 0, 1))
         self.set_drawing_area()
-        self.touchHandler = TouchHandler(self.drawing_areas)
+        self.touchHandler = TouchHandler(self.set_DA_fullScreen, self.set_DA_normal, self.set_DA_collapse)
+
 
     def set_pipelines(self, pipelines):
         self.pipelines = pipelines
@@ -33,13 +33,15 @@ class GTKwindow(Gtk.Window):
         
 
     def set_drawing_area(self):
-        positions = [(0, 0), (960, 0), (0, 540), (960, 540)]  # Position for each camera feed
         self.drawing_areas = {}
         for index, ip in enumerate(self.every_ip):
             self.drawing_areas[ip] = Gtk.DrawingArea()
             self.drawing_areas[ip].set_size_request(960, 540)  # Set size of each camera feed
-            x, y = positions[index]
+            x, y = self.DA_positions[index]
             self.box.put(self.drawing_areas[ip], x, y)  # Place each camera feed at specified position
+
+    def get_drawing_area(self):
+        return self.drawing_areas
         
     def connect_drawing_area(self):
         for ip in self.every_ip:
@@ -56,3 +58,15 @@ class GTKwindow(Gtk.Window):
             if pipeline_sink:
                 pipeline_sink.set_window_handle(xid)
                 print("pipeline sink set to window handle", xid)
+
+    def set_DA_fullScreen(self, ip):
+        self.drawing_areas[ip].set_size_request(1920, 1080)
+        self.box.move(self.drawing_areas[ip], 0, 0)
+
+    def set_DA_normal(self, ip):
+        x, y = self.DA_positions[self.every_ip.index(ip)]
+        self.drawing_areas[ip].set_size_request(960, 540)
+        self.box.move(self.drawing_areas[ip], x, y)
+
+    def set_DA_collapse(self, ip):
+        self.drawing_areas[ip].set_size_request(0, 0)

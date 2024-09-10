@@ -10,6 +10,7 @@ from GTKwindow import *
 import argparse
 from Pipeline import *
 from HandlerFault import *
+from TouchHandler import *
 
 exit_flag = False
 def signal_handler(sig, frame):
@@ -17,18 +18,6 @@ def signal_handler(sig, frame):
     HandlerFault_thread.join()
     
     Gtk.main_quit()
-    
-#da implementare il touch, funzione provvisoria per test, le coordinate touch vanno inviate a resize_drawing_area
-def test_touch_resize():
-    time.sleep(5)
-    win.resize_drawing_area(100,300)
-    time.sleep(5)
-    win.resize_drawing_area(200,400)
-    print("ciao")
-    time.sleep(3)
-   
-    
-    
 
 signal.signal(signal.SIGINT, signal_handler)
 
@@ -56,7 +45,6 @@ for ip in every_ip:
     Cam_thread=threading.Thread(target=pipes[ip].start).start()
     HandlerFault_thread=threading.Thread(target=HandlersFault_dict[ip].pipeline_started).start()
 
-threading.Thread(target=test_touch_resize).start()
 print("Setup finished, feeding data")
 
 Gtk.main()
