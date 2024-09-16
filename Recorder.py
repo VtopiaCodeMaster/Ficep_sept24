@@ -61,7 +61,7 @@ def merge_videos(folder_path, prefix, output_filename):
     for clip in clips:
         clip.close()
 
-class Recording:
+class Recorder:
     def __init__(self,cam_ip,rec_time=5):
         self.cam_ip = cam_ip
         self.rec_time = rec_time
@@ -81,7 +81,7 @@ class Recording:
                 f"rtspsrc udp-buffer-size=212000 location={self.url} name=src ! "
                 f"rtph265depay ! h265parse config-interval=-1 ! "
                 f"queue name=q0 ! " 
-                f"splitmuxsink location=/home/item/Recordings/tmp{self.cam_ip}_%04d.mp4 max-size-time={self.rec_time*1000000000}"
+                f"splitmuxsink location=/home/item/Recordings/tmp{self.cam_ip}_%04d.mp4 max-size-time={self.rec_time*100000000}"
             )
         self.bus = self.pipeline.get_bus()
         self.bus.add_signal_watch()
@@ -133,11 +133,24 @@ class Recording:
         pass
 
 
-Gst.init(None)
-cam_recording = Recording(80, 1)
-threading.Thread(cam_recording.start(), daemon=True).start()
-print("Recording started")
-time.sleep(18)
-print("saving now!")
-cam_recording.record()
 
+
+
+def recordingAll(ips=[80,85,95,115]):
+    cam_recording = {}
+    for ip in ips:
+        cam_recording[ip] = Recorder(ip)
+        threading.Thread(cam_recording[ip].start(), daemon=True).start()
+    print(f"Recorder {ips} started")
+    #time.sleep(18)
+    print(f"saving {ips} now!")
+    for ip in ips:
+        cam_recording[ip].record()
+
+
+Gst.init(None)
+recordingAll()
+
+#TODO:
+# - fix record timings: idk why, but setting '1' does not correspond to 1 second
+# - implement in the main
