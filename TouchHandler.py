@@ -6,6 +6,8 @@ import time
 import evdev
 from evdev import InputDevice, categorize, ecodes
 import threading
+#may have effect after reboot
+#sudo usermod -aG input item
 
 class TouchHandler:
     def __init__(self, fullscreenCB, normalCB, collapseCB, minTouchInterval=0.5):
