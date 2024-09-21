@@ -28,7 +28,6 @@ class Recorder:
         if sample:
             #with self.buffer_lock:
             self.buffer.append(sample)
-            #print(f"Sample received. Buffer size: {len(self.buffer)}")  # Log buffer size
             # Remove old samples to maintain the buffer duration
             while len(self.buffer) > self.max_buffer_size:
                 old_sample = self.buffer.pop(0)
@@ -82,6 +81,15 @@ class Recorder:
         )
         app_src = self.pipeline_save.get_by_name('app_src')
         if self.buffer:
+            for sample in self.buffer:
+                if sample:
+                    buffer_data = sample.get_buffer()
+                
+                # Check if the buffer is a key frame (non-delta frame)
+                flags = buffer_data.get_flags()
+                if not (flags & Gst.BufferFlags.DELTA_UNIT):
+                    self.buffer = self.buffer[self.buffer.index(sample):]
+                    break
             # Get caps from the first sample and set it on appsrc
             sample_caps = self.buffer[0].get_caps()
             app_src.set_property('caps', sample_caps)
