@@ -92,7 +92,7 @@ def download_recordings():
         logging.error(f"An error occurred: {str(e)}")
         return jsonify({"error": "Failed to process request"}), 500
 
-if __name__ == '__main__':
+def HttpPoller():
     # Start the recorders
     start_recorders()
 
