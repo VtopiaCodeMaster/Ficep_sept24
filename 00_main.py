@@ -12,6 +12,7 @@ from HandlerFault import *
 from Recorder import *
 from TouchHandler import *
 from HttpsDownloader import HttpPoller
+from HttpsDownloader import HttpPoller
 exit_flag = False
 def signal_handler(sig, frame):
     exit_flag = True
