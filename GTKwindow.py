@@ -18,6 +18,7 @@ class GTKwindow(Gtk.Window):
         )  # Collega il segnale destroy a Gtk.main_quit
         self.box = Gtk.Fixed()
         self.add(self.box)
+        self.set_keep_below(True)
         self.override_background_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0, 0, 0, 1))
         self.box.set_redraw_on_allocate(False)
         # Imposta il colore di sfondo su nero
