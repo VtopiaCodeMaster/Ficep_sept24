@@ -11,7 +11,7 @@ PROGRESS_BAR_Y = 900
 PROGRESS_LABEL_X = 900
 PROGRESS_LABEL_Y = 950
 BACKGROUND_IMAGE_PATH = "/home/item/Ficep_sept24/Ficep_Logo.png"
-PROGRESS_DURATION = 10  # in seconds
+PROGRESS_DURATION = 52  # in seconds
 SLEEP_INTERVAL = 1  # in seconds
 
 def create_main_window():
