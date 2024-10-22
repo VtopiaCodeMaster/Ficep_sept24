@@ -7,9 +7,9 @@ from gi.repository import Gst, GLib
 
 
 class Pipeline:
-    def __init__(self,ip):
+    def __init__(self,ip,url):
         self.ip = ip
-        self.url=f"rtsp://192.168.3.{self.ip}:554/stream1"
+        self.url=url
         self.rtspConfig = "latency=10 buffer-mode=none drop-on-latency=true do-retransmission=false udp-buffer-size=212000"
         self.queueConfig = (
             "max-size-bytes=30000000000 leaky=downstream"  # max-size-bytes=0 max-size-time=0"
@@ -37,7 +37,7 @@ class Pipeline:
         self.pipeline = Gst.parse_launch(
             f"{self.streamPath} name=cam_{self.ip} ! valve name=valve_{self.ip} ! mux_0.sink_0 "
             f"{self.faultCam} ! valve name=valve_f{self.ip} drop=True ! mux_0.sink_1 "
-            f"nvstreammux name=mux_0 width=1280 height=720 batch-size=1 {self.muxConfig} ! queue {self.queueConfig} ! "
+            f"nvstreammux name=mux_0 width=1280 height=720 batch-size=1 num-surfaces-per-frame=1 {self.muxConfig} ! queue {self.queueConfig} ! "
             f"{self.glePipe} name=sink_{self.ip} "
         )
         return self.pipeline

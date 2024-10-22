@@ -1,7 +1,7 @@
 import time
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, GObject
+from gi.repository import Gtk, GObject, GLib
 import time
 import evdev
 from evdev import InputDevice, categorize, ecodes
@@ -10,7 +10,8 @@ import threading
 #sudo usermod -aG input item
 
 class TouchHandler:
-    def __init__(self, fullscreenCB, normalCB, collapseCB, minTouchInterval=0.5):
+    def __init__(self, fullscreenCB, normalCB, collapseCB, every_ip, minTouchInterval=0.5):
+        self.every_ip=every_ip
         self.touchx = None
         self.touchy = None
         self.fullscreen_mode = False
@@ -61,23 +62,23 @@ class TouchHandler:
         if self.touchx and self.touchy:
             if not self.fullscreen_mode:
                 if self.touchx <= 960 and self.touchy <= 540:
-                    sel_cam = 80
+                    sel_cam = self.every_ip[0]
                 elif self.touchx > 960 and self.touchy <= 540:
-                    sel_cam = 85
+                    sel_cam = self.every_ip[1]
                 elif self.touchx <= 960 and self.touchy > 540:
-                    sel_cam = 115
+                    sel_cam = self.every_ip[2]
                 elif self.touchx > 960 and self.touchy > 540:
-                    sel_cam = 95
+                    sel_cam = self.every_ip[3]
                 
                 GObject.idle_add(self.fullscreenCB, sel_cam) 
                 self.fullscreen_mode = True
-                for i in [80, 85, 115, 95]:
+                for i in self.every_ip:
                         if i != sel_cam:
                             GObject.idle_add(self.collapseCB, i)
                 print("here")
             else:  
                 if self.touchx != 0 and self.touchy != 0:
-                    for i in [80, 85, 115, 95]:
+                    for i in self.every_ip:
                         GObject.idle_add(self.normalCB, i)
                     self.fullscreen_mode = False
                     self.touchx = 0

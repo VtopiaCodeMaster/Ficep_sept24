@@ -14,11 +14,11 @@ app = Flask(__name__)
 recorders = []  # To hold the Recorder objects
 recorders_lock = threading.Lock()  # For thread-safe access to recorders
 
-every_ip = [110, 85, 115, 95]  # List of IPs
+every_ip = [50,51,52,53]  # List of IPs
 
 # Function to set up the recorder for each IP
-def rec_setup(ip):
-    rec = Recorder(ip)
+def rec_setup(ip,url):
+    rec = Recorder(ip,url)
     rec.setup_pipeline()
     threading.Thread(target=rec.start_pipeline).start()
 
@@ -27,9 +27,9 @@ def rec_setup(ip):
     logging.info(f"Recorder for IP {ip} set up and pipeline started.")
 
 # Function to start recording pipelines in separate threads
-def start_recorders():
+def start_recorders(every_ip,everyUrl):
     for ip in every_ip:
-        threading.Thread(target=rec_setup, args=(ip,)).start()
+        threading.Thread(target=rec_setup, args=(ip,everyUrl[ip])).start()
 
 # Function to trigger on_request() for each recorder concurrently
 def trigger_on_requests():
@@ -92,8 +92,8 @@ def download_recordings():
         logging.error(f"An error occurred: {str(e)}")
         return jsonify({"error": "Failed to process request"}), 500
 
-def HttpPoller():
+def HttpPoller(every_ip,everyUrl):
     # Start the recorders
-    start_recorders()
+    start_recorders(every_ip,everyUrl)
     # Run the Flask app
     app.run(host='0.0.0.0', port=8000)

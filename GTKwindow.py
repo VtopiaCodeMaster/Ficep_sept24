@@ -24,7 +24,7 @@ class GTKwindow(Gtk.Window):
         # Imposta il colore di sfondo su nero
         # self.override_background_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0, 0, 0, 1))
         self.set_drawing_area()
-        self.touchHandler = TouchHandler(self.set_DA_fullScreen, self.set_DA_normal, self.set_DA_collapse)
+        self.touchHandler = TouchHandler(self.set_DA_fullScreen, self.set_DA_normal, self.set_DA_collapse, self.every_ip)
 
 
     def set_pipelines(self, pipelines):

@@ -23,7 +23,10 @@ signal.signal(signal.SIGINT, signal_handler)
 
 Gst.init(None)
 
-every_ip=[80,85,115,95]
+every_ip=[50,51,52,53]
+everyUrl={}
+for ip in every_ip:
+    everyUrl[ip]=f"rtsp://172.16.5.{ip}:554/stream1"
 win = GTKwindow(every_ip)
 
 
@@ -31,7 +34,7 @@ pipelines={}
 pipes={}
 HandlersFault_dict={}
 for ip in every_ip:
-    pipes[ip]=Pipeline(ip)
+    pipes[ip]=Pipeline(ip,everyUrl[ip])
     pipelines[ip] = pipes[ip].createPipeline()
     HandlersFault_dict[ip]=HandlerFault(pipelines[ip], ip)
 
@@ -39,7 +42,7 @@ win.set_pipelines(pipelines)
 
 win.show_all()
 win.connect_drawing_area()
-HttpThread = threading.Thread(target=HttpPoller)
+HttpThread = threading.Thread(target=HttpPoller, args=(every_ip, everyUrl))
 for ip in every_ip:
     Cam_thread=threading.Thread(target=pipes[ip].start).start()
     HandlerFault_thread=threading.Thread(target=HandlersFault_dict[ip].pipeline_started).start()

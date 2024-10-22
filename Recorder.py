@@ -7,9 +7,10 @@ gi.require_version('Gst', '1.0')
 from gi.repository import Gst, GObject, GLib
 
 class Recorder:
-    def __init__(self,ip):
+    def __init__(self,ip,url):
         Gst.init(None)
         self.ip = ip
+        self.url=url
         self.buffer_duration = 30
         self.fps = 18       # frames per second
         self.max_buffer_size = self.fps * self.buffer_duration # Total frames to store
@@ -46,7 +47,7 @@ class Recorder:
     
     def setup_pipeline(self):
         pipe_str = (
-        f"rtspsrc location=rtsp://192.168.3.{self.ip}:554/stream1 latency=100 ! queue max-size-bytes=294967295 ! "
+        f"rtspsrc location={self.url} latency=100 ! queue max-size-bytes=294967295 ! "
         f"rtph265depay ! h265parse ! queue ! appsink name=app_sink{self.ip} emit-signals=true sync=false"
         )
     
