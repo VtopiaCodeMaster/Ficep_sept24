@@ -96,4 +96,4 @@ def HttpPoller(every_ip,everyUrl):
     # Start the recorders
     start_recorders(every_ip,everyUrl)
     # Run the Flask app
-    app.run(host='0.0.0.0', port=8000)
+    app.run(host='0.0.0.0', port=8080)
