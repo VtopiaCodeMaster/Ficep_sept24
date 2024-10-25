@@ -25,6 +25,7 @@ class TouchHandler:
 
         self._find_touchscreen_device()
         threading.Thread(target=self.get_touchscreen).start()
+        threading.Thread(target=self.random_touch).start() # For testing purposes
         
     def _find_touchscreen_device(self):
         devices = [InputDevice(path) for path in evdev.list_devices()]
@@ -84,6 +85,17 @@ class TouchHandler:
                     self.touchx = 0
                     self.touchy = 0
 
-
-   
-            
+    # To be used for testing purposes
+    def _simulate_touch(self, x, y):
+        self.touchx = x
+        self.touchy = y
+        print(f"Simulated touch at: ({self.touchx}, {self.touchy})")
+        self.updateDA()
+    
+    def random_touch(self):
+        import random
+        while True:
+            x = random.randint(0, 1920)
+            y = random.randint(0, 1080)
+            self._simulate_touch(x, y)
+            time.sleep(1)

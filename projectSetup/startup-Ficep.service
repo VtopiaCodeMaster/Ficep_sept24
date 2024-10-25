@@ -1,0 +1,17 @@
+[Unit]
+Description=Startup Process Service
+After=graphical.target
+
+[Service]
+Type=simple
+ExecStart=/home/item/Ficep_sept24/StartupProcess.sh
+WorkingDirectory=/home/item/Ficep_sept24
+User=item
+Group=item
+Environment=DISPLAY=:0
+StandardOutput=syslog
+StandardError=syslog
+Restart=on-failure
+
+[Install]
+WantedBy=graphical.target
