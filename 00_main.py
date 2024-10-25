@@ -41,6 +41,7 @@ for ip in every_ip:
 win.set_pipelines(pipelines)
 
 win.show_all()
+win.hide_cursor()
 win.connect_drawing_area()
 HttpThread = threading.Thread(target=HttpPoller, args=(every_ip, everyUrl))
 for ip in every_ip:

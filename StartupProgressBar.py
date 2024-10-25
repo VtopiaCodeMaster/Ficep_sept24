@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
-import time
+import threading
 
 WINDOW_WIDTH = 1920
 WINDOW_HEIGHT = 1080
@@ -22,7 +22,7 @@ def create_main_window():
 
 def load_background_image():
     bg_image = Image.open(BACKGROUND_IMAGE_PATH)
-    bg_image = bg_image.resize((WINDOW_WIDTH, WINDOW_HEIGHT), Image.Resampling.LANCZOS)
+    bg_image = bg_image.resize((WINDOW_WIDTH, WINDOW_HEIGHT), Image.LANCZOS)
     return ImageTk.PhotoImage(bg_image)
 
 def add_background_label(root, bg_photo):
@@ -41,16 +41,19 @@ def add_progress_label(root):
 
 def update_progress_bar(progress_bar, progress_label):
     progress = 0
-    step = 100 / PROGRESS_DURATION 
+    step = 100 / PROGRESS_DURATION
 
-    while progress <= 100:
-        progress_bar['value'] = progress
-        progress_label.config(text=f"{int(progress)}%")
-        root.update_idletasks()
-        time.sleep(SLEEP_INTERVAL)
-        progress += step
+    def update():
+        nonlocal progress
+        if progress <= 100:
+            progress_bar['value'] = progress
+            progress_label.config(text=f"{int(progress)}%")
+            progress += step
+            root.after(int(SLEEP_INTERVAL * 1000), update)
+        else:
+            root.destroy()
 
-    root.destroy()
+    update()  # Start the update loop
 
 def main():
     global root
@@ -62,8 +65,8 @@ def main():
     progress_bar = add_progress_bar(root)
     progress_label = add_progress_label(root)
 
-    # Start updating the progress bar after 1 second
-    root.after(1000, lambda: update_progress_bar(progress_bar, progress_label))
+    # Use threading to prevent freezing on startup
+    threading.Thread(target=lambda: update_progress_bar(progress_bar, progress_label)).start()
 
     root.mainloop()
 

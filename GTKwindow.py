@@ -12,13 +12,14 @@ class GTKwindow(Gtk.Window):
         self.set_default_size(1920, 1080)  # Imposta la dimensione iniziale della finestra
         self.DA_positions = [(0, 0), (960, 0), (0, 540), (960, 540)]  # Position for each camera feed
         self.set_decorated(False)  # Rimuove la barra del titolo
+        self.set_keep_above(True) 
         self.move(0, 0)
         self.connect(
             "destroy", Gtk.main_quit
         )  # Collega il segnale destroy a Gtk.main_quit
         self.box = Gtk.Fixed()
         self.add(self.box)
-        self.set_keep_below(True)
+        #self.set_keep_below(True)
         self.override_background_color(Gtk.StateFlags.NORMAL, Gdk.RGBA(0, 0, 0, 1))
         self.box.set_redraw_on_allocate(False)
         # Imposta il colore di sfondo su nero
@@ -71,3 +72,7 @@ class GTKwindow(Gtk.Window):
 
     def set_DA_collapse(self, ip):
         self.drawing_areas[ip].set_size_request(0, 0)
+    
+    def hide_cursor(window):
+        invisible_cursor = Gdk.Cursor.new(Gdk.CursorType.BLANK_CURSOR)
+        window.get_window().set_cursor(invisible_cursor)
