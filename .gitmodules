@@ -1,0 +1,3 @@
+[submodule "Vlib"]
+	path = Vlib
+	url = git@github.com:VtopiaCodeMaster/Vlib.git
