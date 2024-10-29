@@ -11,7 +11,7 @@ from Vlib.VtopiaSWUpdate.Updater import Updater
 if __name__ == '__main__':
 
     config = UpdateConfig( 
-        urlJson = 'https://www.item.to.it/Ficep/updates/latest_version.json',
+        urlJson = 'https://www.item.to.it/Ficep/Polaris/v01/latest_version.json',
         zipFile = '/home/item/update.zip',
         unzipPath = '/home/item/updatefolder',
         installerFile = '/home/item/updatefolder/Ficep_sept24/03_installNewVersion.bin',
