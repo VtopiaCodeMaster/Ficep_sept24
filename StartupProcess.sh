@@ -43,7 +43,7 @@ openbox --replace --sm-disable &
 
 echo "Starting 00_main.py in the background..." | tee -a /tmp/script.log
 
-python3 /home/item/Ficep_sept24/00_main.py &
+/home/item/Ficep_sept24/00_main &
 MAIN_PID=$!
 # Wait for a short moment to ensure the main window is created
 sleep 2

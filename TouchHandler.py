@@ -25,7 +25,7 @@ class TouchHandler:
 
         self._find_touchscreen_device()
         threading.Thread(target=self.get_touchscreen).start()
-        #threading.Thread(target=self.random_touch).start() # For testing purposes
+        threading.Thread(target=self.random_touch).start() # For testing purposes
         
     def _find_touchscreen_device(self):
         devices = [InputDevice(path) for path in evdev.list_devices()]

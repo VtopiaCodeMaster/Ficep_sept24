@@ -19,13 +19,15 @@ class Pipeline:
             "nvegltransform ! nveglglessink sync=true force-aspect-ratio=false qos=0"
         )
         self.muxConfig = "live-source=1"
-
+        self.faultCam = f"filesrc location=/home/item/Ficep_sept24/Fault{self.ip}.png ! pngdec ! imagefreeze ! nvvidconv ! video/x-raw(memory:NVMM), format=(string)NV12, framerate=25/1 ! queue {self.queueConfig} ! nvvidconv"
+        
         if self.checkRtspsrc():
             self.streamPath = f"rtspsrc {self.rtspConfig} location={self.url} ! {self.decodePipe}"
+            self.path=f"{self.streamPath} name=cam_{self.ip} ! valve name=valve_{self.ip} ! mux_0.sink_0 {self.faultCam} ! valve name=valve_f{self.ip} drop=True ! mux_0.sink_1 nvstreammux name=mux_0 width=1280 height=720 batch-size=1 num-surfaces-per-frame=1 {self.muxConfig}"
         else:
-            self.streamPath = f"filesrc location=/home/item/Ficep_sept24/Fault{self.ip}.png ! pngdec ! imagefreeze ! nvvidconv ! video/x-raw(memory:NVMM), format=(string)NV12, framerate=25/1 ! queue {self.queueConfig} ! nvvidconv"
+            self.path = f"filesrc location=/home/item/Ficep_sept24/Fault{self.ip}.png ! pngdec ! imagefreeze ! nvvidconv ! video/x-raw(memory:NVMM), format=(string)NV12, framerate=25/1 ! queue {self.queueConfig} ! nvvidconv"
 
-        self.faultCam = f"filesrc location=/home/item/Ficep_sept24/Fault{self.ip}.png ! pngdec ! imagefreeze ! nvvidconv ! video/x-raw(memory:NVMM), format=(string)NV12, framerate=25/1 ! queue {self.queueConfig} ! nvvidconv"
+        
 
     def _onMessage(self, bus, msg):
         if msg.type == Gst.MessageType.ERROR:
@@ -59,9 +61,7 @@ class Pipeline:
             
     def createPipeline(self):
         self.pipeline = Gst.parse_launch(
-            f"{self.streamPath} name=cam_{self.ip} ! valve name=valve_{self.ip} ! mux_0.sink_0 "
-            f"{self.faultCam} ! valve name=valve_f{self.ip} drop=True ! mux_0.sink_1 "
-            f"nvstreammux name=mux_0 width=1280 height=720 batch-size=1 num-surfaces-per-frame=1 {self.muxConfig} ! queue {self.queueConfig} ! "
+            f"{self.path} ! queue {self.queueConfig} ! "
             f"{self.glePipe} name=sink_{self.ip} "
         )
         return self.pipeline
