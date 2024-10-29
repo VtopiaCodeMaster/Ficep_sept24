@@ -47,11 +47,13 @@ pipelines={}
 pipes={}
 HandlersFault_dict={}
 workingIp=[]
+workingUrl={}
 for ip in every_ip:
     pipes[ip]=Pipeline(ip,everyUrl[ip])
     pipelines[ip] = pipes[ip].createPipeline()
     if pipes[ip].workingIp():
         workingIp.append(ip)
+        workingUrl[ip]=everyUrl[ip]
         HandlersFault_dict[ip]=HandlerFault(pipelines[ip], ip)
 print("Working Ip: ", workingIp)
 
@@ -60,7 +62,7 @@ win.set_pipelines(pipelines)
 win.show_all()
 win.hide_cursor()
 win.connect_drawing_area()
-HttpThread = threading.Thread(target=HttpPoller, args=(workingIp, everyUrl))
+HttpThread = threading.Thread(target=HttpPoller, args=(workingIp, workingUrl))
 for ip in every_ip:
     Cam_thread=threading.Thread(target=pipes[ip].start).start()
 for ip in workingIp:
