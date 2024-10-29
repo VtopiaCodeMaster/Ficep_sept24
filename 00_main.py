@@ -33,19 +33,24 @@ win = GTKwindow(every_ip)
 pipelines={}
 pipes={}
 HandlersFault_dict={}
+workingIp=[]
 for ip in every_ip:
     pipes[ip]=Pipeline(ip,everyUrl[ip])
     pipelines[ip] = pipes[ip].createPipeline()
-    HandlersFault_dict[ip]=HandlerFault(pipelines[ip], ip)
+    if pipes[ip].workingIp():
+        workingIp.append(ip)
+        HandlersFault_dict[ip]=HandlerFault(pipelines[ip], ip)
+print("Working Ip: ", workingIp)
 
 win.set_pipelines(pipelines)
 
 win.show_all()
 win.hide_cursor()
 win.connect_drawing_area()
-HttpThread = threading.Thread(target=HttpPoller, args=(every_ip, everyUrl))
+HttpThread = threading.Thread(target=HttpPoller, args=(workingIp, everyUrl))
 for ip in every_ip:
     Cam_thread=threading.Thread(target=pipes[ip].start).start()
+for ip in workingIp:
     HandlerFault_thread=threading.Thread(target=HandlersFault_dict[ip].pipeline_started).start()
 HttpThread.start()
 print("Setup finished, feeding data")

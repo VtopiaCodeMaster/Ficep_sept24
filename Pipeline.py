@@ -1,10 +1,10 @@
 import gi
 
-
+import socket
 gi.require_version("Gst", "1.0")
 gi.require_version("GstRtsp", "1.0")
 from gi.repository import Gst, GLib
-
+from urllib.parse import urlparse
 
 class Pipeline:
     def __init__(self,ip,url):
@@ -19,7 +19,12 @@ class Pipeline:
             "nvegltransform ! nveglglessink sync=true force-aspect-ratio=false qos=0"
         )
         self.muxConfig = "live-source=1"
-        self.streamPath = f"rtspsrc {self.rtspConfig} location={self.url} ! {self.decodePipe}"
+
+        if self.checkRtspsrc():
+            self.streamPath = f"rtspsrc {self.rtspConfig} location={self.url} ! {self.decodePipe}"
+        else:
+            self.streamPath = f"filesrc location=/home/item/Ficep_sept24/Fault{self.ip}.png ! pngdec ! imagefreeze ! nvvidconv ! video/x-raw(memory:NVMM), format=(string)NV12, framerate=25/1 ! queue {self.queueConfig} ! nvvidconv"
+
         self.faultCam = f"filesrc location=/home/item/Ficep_sept24/Fault{self.ip}.png ! pngdec ! imagefreeze ! nvvidconv ! video/x-raw(memory:NVMM), format=(string)NV12, framerate=25/1 ! queue {self.queueConfig} ! nvvidconv"
 
     def _onMessage(self, bus, msg):
@@ -33,6 +38,25 @@ class Pipeline:
         elif msg.type == Gst.MessageType.STATE_CHANGED:
             pass
     
+    def workingIp(self):
+        if self.checkRtspsrc():
+            return True
+        
+    def checkRtspsrc(self):
+        parsed_url = urlparse(self.url)
+        host = parsed_url.hostname
+        port = parsed_url.port if parsed_url.port else 554  # Default RTSP port is 554
+
+        # Create a socket to check the connection
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(2)  # Set timeout to 2 seconds
+            try:
+                s.connect((host, port))
+                return True
+            except (socket.timeout, socket.error):
+                print(f"WAR: RTSP source {self.url} is not available.")
+                return False
+            
     def createPipeline(self):
         self.pipeline = Gst.parse_launch(
             f"{self.streamPath} name=cam_{self.ip} ! valve name=valve_{self.ip} ! mux_0.sink_0 "

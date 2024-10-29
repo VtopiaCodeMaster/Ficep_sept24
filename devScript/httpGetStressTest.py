@@ -2,6 +2,7 @@ import requests
 import time
 
 def send_http_get(url, interval):
+     
     
     try:
         response = requests.get(url)

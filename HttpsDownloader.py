@@ -14,7 +14,7 @@ app = Flask(__name__)
 recorders = []  # To hold the Recorder objects
 recorders_lock = threading.Lock()  # For thread-safe access to recorders
 
-every_ip = [50,51,52,53]  # List of IPs
+#every_ip = [50,51,52,53]  # List of IPs
 
 # Function to set up the recorder for each IP
 def rec_setup(ip,url):
