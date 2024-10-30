@@ -16,11 +16,11 @@ if __name__ == '__main__':
         unzipPath = '/home/item/updatefolder',
         installerFile = '/home/item/updatefolder/Ficep_sept24/03_installNewVersion.bin',
         zipPassword = 'D4M4R0_cmg',
-        systemPassword = 'D4M4R0 cmg',
+        systemPassword = 'item178',
         installPath = '/home/item/Ficep_sept24',
         localJsonFile = '/home/item/Ficep_sept24/current_version.json',
         backupPath = '/home/item/backup',
-        filesToRemoveAfterInstall=["files_to_remove.txt","03_installNewVersion.bin"]
+        filesToRemoveAfterInstall=["files_to_remove.txt","02_installNewVersion.bin"]
     )
     Gtk.init(None)
     
