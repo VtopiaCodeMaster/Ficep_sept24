@@ -15,20 +15,12 @@ from HttpsDownloader import HttpPoller
 from Vlib.VtopiaSWUpdate.InternetConnectionChecker import InternetConnectionChecker
 from Vlib.VtopiaSWUpdate.VersionComparer import *
 exit_flag = False
+
 def signal_handler(sig, frame):
     exit_flag = True
     HandlerFault_thread.join()
     
     Gtk.main_quit()
-
-if InternetConnectionChecker.is_connected():
-    try:
-        VersionComparer=VersionComparer('/home/item/Ficep_sept24/current_version.json','https://www.item.to.it/Ficep/Polaris/v01/latest_version.json')
-        VersionComparer.is_update_available()
-        subprocess.check_call(['/home/item/Ficep_sept24/01_update.bin'])
-    except CheckVersionError as error:
-        print(error)
-        pass
 
 signal.signal(signal.SIGINT, signal_handler)
 

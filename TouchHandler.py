@@ -98,4 +98,4 @@ class TouchHandler:
             x = random.randint(0, 1920)
             y = random.randint(0, 1080)
             self._simulate_touch(x, y)
-            time.sleep(1)
+            time.sleep(10)
