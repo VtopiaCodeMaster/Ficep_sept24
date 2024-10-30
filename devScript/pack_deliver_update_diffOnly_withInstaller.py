@@ -96,7 +96,7 @@ def main():
     print(f"Zip size: {update_json['zip_size']} KB")
 
     os.makedirs("zip_with_pw_check_size", exist_ok=True)
-
+    input("Continue?")
     # Extract zip file to check size
     print("Extracting zip file to check size...")
     extract_files(zip_filename, "zip_with_pw_check_size", "D4M4R0_cmg")
