@@ -32,7 +32,7 @@ if checkerInternet.is_connected():
 
 signal.signal(signal.SIGINT, signal_handler)
 
-
+#new version evviva
 
 Gst.init(None)
 

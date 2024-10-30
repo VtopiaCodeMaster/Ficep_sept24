@@ -24,7 +24,7 @@ if __name__ == '__main__':
     )
     Gtk.init(None)
     
-    window = AutomaticProcedureGUI("Upgrade", logo_path="/home/item/Ficep_sept24/Ficep_Logo.png")
+    window = AutomaticProcedureGUI("Upgrade", logo_path="/home/item/Ficep_sept24/VTopia_logo.png")
     window.runInThread()
 
     updater = Updater(config=config, 
