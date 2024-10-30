@@ -16,7 +16,7 @@ if __name__ == '__main__':
         #installPath="/home/item/FakeInstallDir/Vtopia_Nord_BEV",
         fileRemoverTxtPath="/home/item/updatefolder/Ficep_sept24/files_to_remove.txt"
     )
-    window = AutomaticProcedureGUI("Installation", logo_path="/home/item/Ficep_sept24/Ficep_Logo.png")
+    window = AutomaticProcedureGUI("Installation", logo_path="/home/item/Ficep_sept24/VTopia_logo.png")
     window.runInThread()
 
     installer = Installer(
