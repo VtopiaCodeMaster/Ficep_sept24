@@ -12,7 +12,7 @@ from TouchHandler import *
 from HttpsDownloader import HttpPoller
 from HttpsDownloader import HttpPoller
 
-from Vlib.SerialNumberChecks.SNCheck import SNCheck
+from Vlib.SerialNumberChecks.SNChecker import SNChecker
 exit_flag = False
 
 def signal_handler(sig, frame):
@@ -23,9 +23,9 @@ def signal_handler(sig, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
-SNc = SNCheck(folder_to_clear="/home/item/Ficep_sept24",
+SNc = SNChecker(folder_to_clear="/home/item/Ficep_sept24",
               SNpath="/home/item/glibc-2.28/benchtests/strcoll-inputs/SN.txt")
-SNc.check_SN()
+SNc.check()
 
 Gst.init(None)
 
