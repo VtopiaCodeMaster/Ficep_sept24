@@ -23,7 +23,7 @@ def signal_handler(sig, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
-SNc = SNChecker(folder_to_clear="/home/item/Ficep_sept24",
+SNc = SNChecker(folderToClear="/home/item/Ficep_sept24",
               SNpath="/home/item/glibc-2.28/benchtests/strcoll-inputs/SN.txt")
 SNc.check()
 
@@ -58,8 +58,8 @@ win.connect_drawing_area()
 HttpThread = threading.Thread(target=HttpPoller, args=(workingIp, workingUrl))
 for ip in every_ip:
     Cam_thread=threading.Thread(target=pipes[ip].start).start()
-for ip in workingIp:
-    HandlerFault_thread=threading.Thread(target=HandlersFault_dict[ip].pipeline_started).start()
+'''for ip in workingIp:
+    HandlerFault_thread=threading.Thread(target=HandlersFault_dict[ip].pipeline_started).start()'''
 HttpThread.start()
 print("Setup finished, feeding data")
 
