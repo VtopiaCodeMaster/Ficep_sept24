@@ -2,67 +2,128 @@ import threading
 import gi
 gi.require_version('Gst', '1.0')
 gi.require_version('GstVideo', '1.0')
-from gi.repository import Gst, GstVideo
-import signal
-from GTKwindow import *
-from Pipeline import *
-from HandlerFault import *
-from Recorder import *
+from gi.repository import Gst,GstVideo
 from TouchHandler import *
-from HttpsDownloader import HttpPoller
-from HttpsDownloader import HttpPoller
-
+import json
+from Vlib.Gst.FrameBank import *
+from Vlib.Gst.FBOutput import *
+from Vlib.Gst.FBInput import *
 from Vlib.SerialNumberChecks.SNChecker import SNChecker
+from Vlib.Gst.PipeBlocks.NvGleSink import NvGleSink
+from Vlib.Gst.PipeBlocks.Resize import Resize
+from Vlib.Gtk.GstDrawingArea import GstDrawingArea
+from Vlib.Gtk.UndecoratedWindow import UndecoratedWindow
+from threading import Thread
+from Window import Window
 exit_flag = False
 
-def signal_handler(sig, frame):
-    exit_flag = True
-    HandlerFault_thread.join()
-    
-    Gtk.main_quit()
+def extract_local_dict(json_file):
+    with open(json_file, "r") as f:
+        data = json.load(f)
+    return data
 
-signal.signal(signal.SIGINT, signal_handler)
+def setupLocalInput(everyLocalUrl):
+    localInput = {}
+    for ip in everyLocalUrl:
+        input = FBInput(type=FBInputType.safeH265,
+                        name=ip,
+                        addr=everyLocalUrl[ip],
+                        path="Vlib/Gst/test/1280_720.png",
+                        mode=RtspSrcMode.H265DECODE_DEFAULT)
+        fb.addInput(input)
+        localInput[ip] = input
+    return localInput
+
+def setupRemoteInput(everyRemoteUrl):
+    remoteInput = {}
+    for ip in everyRemoteUrl:
+        input = FBInput(type=FBInputType.safeH265,
+                        name=ip,
+                        addr=everyRemoteUrl[ip],
+                        path="Vlib/Gst/test/1280_720.png",
+                        mode=RtspSrcMode.H265DECODE_DEFAULT)
+        
+        fb.addInput(input)
+        remoteInput[ip] = input
+   
+    return remoteInput
+
+def setupOutput(fps,localInput,remoteInput):
+    outputs = {}
+    for ipLoc,ipRem in zip(localInput,remoteInput):
+        output = FBOutput(type = FBOutputType.streamSelector,
+                            name=f"output{ipLoc}{ipRem}",
+                            src = [ipLoc, ipRem],
+                            fps = int(fps))
+        outputs[f"output{ipLoc}{ipRem}"] = output
+    return outputs
+                      
+def startPipes(win:Window):
+    time.sleep(2)
+    pipes=[]
+    appsrcs=[]
+    position=[(0,0),(960,0),(0,540),(960,540)]
+    for output in outputs:
+        appsrc = fb.getOutput(outputs[output])
+        sink = NvGleSink(name=f"sink{output}")
+        
+        outFPS = FPSCounter(name=f"outFPS{output}", interval=2)
+        sink.addCallback(PipeCallbackDescriptor(
+            callback=outFPS.tick,
+            elName=f"sink{output}",
+            plug=PipeCallbackPlug.ON_PAD,
+            plugName="sink"
+        ))
+        lsb=LiveStreamBuffer(name=f"lsb{output}", bufferSize=2)
+        pipe = GstPipeRunner(appsrc.link(Resize(960,540)).link(lsb).link(sink))
+        DA = GstDrawingArea(nvGleSink=sink, defaultSize=(960, 540), defaultPosition=position.pop(0))
+        win.addGstDrawingArea(DA)
+        pipes.append(pipe)
+        appsrcs.append(appsrc)
+        outFPS.printInThread()
+    time.sleep(5)
+    for pipe in pipes:
+        pipe.start()
+
+    for input in localInput:
+        fb.acquire(localInput[input])
+        time.sleep(1)
+    for input in remoteInput:
+        fb.acquire(remoteInput[input])
+        time.sleep(1)
+    for output in outputs:
+        outputs[output].start()
+    win.setupButton("Action", changeVisualization, (100, 100))
+    GLib.idle_add(win.show_all)
+
+def changeVisualization(button):
+    print("Button pressed")
+    while True:
+        for output in outputs:
+            outputs[output].outStream=1
+        time.sleep(3)
+        for output in outputs:
+            outputs[output].outStream=0
+        time.sleep(3)
 
 SNc = SNChecker(folderToClear="/home/item/Ficep_sept24",
               SNpath="/home/item/glibc-2.28/benchtests/strcoll-inputs/SN.txt")
 SNc.check()
 
+jsonDict = extract_local_dict("config.json")
+everyLocalUrl = jsonDict["local"]
+everyRemoteUrl = jsonDict["remote"]
+fps=jsonDict["fps"]
 Gst.init(None)
+fb = FrameBank()
+localInput=setupLocalInput(everyLocalUrl)
+remoteInput=setupRemoteInput(everyRemoteUrl)
+outputs=setupOutput(fps,localInput,remoteInput)
 
-every_ip=[50,51,52,53]
-everyUrl={}
-for ip in every_ip:
-    everyUrl[ip]=f"rtsp://172.16.5.{ip}:554/stream1"
-win = GTKwindow(every_ip)
-
-
-pipelines={}
-pipes={}
-HandlersFault_dict={}
-workingIp=[]
-workingUrl={}
-for ip in every_ip:
-    pipes[ip]=Pipeline(ip,everyUrl[ip])
-    pipelines[ip] = pipes[ip].createPipeline()
-    if pipes[ip].workingIp():
-        workingIp.append(ip)
-        workingUrl[ip]=everyUrl[ip]
-        HandlersFault_dict[ip]=HandlerFault(pipelines[ip], ip)
-print("Working Ip: ", workingIp)
-
-win.set_pipelines(pipelines)
-
-win.show_all()
-win.hide_cursor()
-win.connect_drawing_area()
-HttpThread = threading.Thread(target=HttpPoller, args=(workingIp, workingUrl))
-for ip in every_ip:
-    Cam_thread=threading.Thread(target=pipes[ip].start).start()
-'''for ip in workingIp:
-    HandlerFault_thread=threading.Thread(target=HandlersFault_dict[ip].pipeline_started).start()'''
-HttpThread.start()
-print("Setup finished, feeding data")
-
+win = Window("Basic Rtsp Pipe", defaultSize=(1920, 1080), defaultPosition=(0, 0))
+win.start()
+setupThread = Thread(target=startPipes, args=(win,), daemon=True)
+setupThread.start()
+buttontestthreadstimered = threading.Timer(20, changeVisualization, [win])
+buttontestthreadstimered.start()
 Gtk.main()
-
-
