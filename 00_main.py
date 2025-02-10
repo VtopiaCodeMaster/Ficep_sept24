@@ -41,28 +41,15 @@ def setupLocalInput(everyLocalUrl):
         localInput[ip] = input
     return localInput
 
-def setupRemoteInput(everyRemoteUrl):
-    remoteInput = {}
-    for ip in everyRemoteUrl:
-        input = FBInput(type=FBInputType.safeH265,
-                        name=ip,
-                        addr=everyRemoteUrl[ip],
-                        path="/home/item/Ficep_sept24/Vlib/Gst/test/1280_720.png",
-                        mode=RtspSrcMode.H265DECODE_DEFAULT)
-        
-        fb.addInput(input)
-        remoteInput[ip] = input
-   
-    return remoteInput
 
-def setupOutput(fps,localInput,remoteInput):
+def setupOutput(fps,localInput):
     outputs = {}
-    for ipLoc,ipRem in zip(localInput,remoteInput):
+    for ipLoc in localInput:
         output = FBOutput(type = FBOutputType.streamSelector,
-                            name=f"output{ipLoc}{ipRem}",
-                            src = [ipLoc, ipRem],
+                            name=f"output{ipLoc}",
+                            src = [ipLoc],
                             fps = int(fps))
-        outputs[f"output{ipLoc}{ipRem}"] = output
+        outputs[f"output{ipLoc}"] = output
     return outputs
                       
 def startPipes(win:Window):
@@ -95,28 +82,9 @@ def startPipes(win:Window):
     for input in localInput:
         fb.acquire(localInput[input])
         time.sleep(1)
-    for input in remoteInput:
-        fb.acquire(remoteInput[input])
-        time.sleep(1)
     for output in outputs:
         outputs[output].start()
-    GLib.idle_add(lambda: win.setupButton("Local", changeVisualization, (1820, 980)))
     GLib.idle_add(win.show_all)
-
-def changeVisualization(button):
-    print("Button pressed")
-    
-    first_key = next(iter(outputs))
-    buttonStr=button.get_label()
-    # Check if that first output is "1"
-    if outputs[first_key].outStream == 1:
-        button.set_label("Local")
-        for key in outputs:
-            outputs[key].outStream = 0
-    else:
-        button.set_label("Remote")
-        for key in outputs:
-            outputs[key].outStream = 1
 
 def setupRecording(localUrls: Dict[str, str]):
     listUrls = list(localUrls.values())
@@ -151,13 +119,11 @@ SNc.check()
 
 jsonDict = extract_local_dict("/home/item/Ficep_sept24/config.json")
 everyLocalUrl = jsonDict["local"]
-everyRemoteUrl = jsonDict["remote"]
 fps=jsonDict["fps"]
 Gst.init(None)
 fb = FrameBank()
 localInput=setupLocalInput(everyLocalUrl)
-remoteInput=setupRemoteInput(everyRemoteUrl)
-outputs=setupOutput(fps,localInput,remoteInput)
+outputs=setupOutput(fps,localInput)
 
 win = Window("Basic Rtsp Pipe", defaultSize=(1920, 1080), defaultPosition=(0, 0))
 win.start()
