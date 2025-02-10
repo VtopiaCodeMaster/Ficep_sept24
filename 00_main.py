@@ -5,7 +5,9 @@ gi.require_version('GstVideo', '1.0')
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gst,GstVideo,GLib,GObject, Gtk
 import time
-
+from zipfile import ZipFile
+from functools import partial
+import os
 import json
 from Vlib.Gst.FrameBank import *
 from Vlib.Gst.FBOutput import *
@@ -17,6 +19,9 @@ from Vlib.Gtk.GstDrawingArea import GstDrawingArea
 from Vlib.Gtk.UndecoratedWindow import UndecoratedWindow
 from threading import Thread
 from Window import Window
+from Vlib.http.HttpGETServer import HttpGETServer
+from SetupRecording import SetupRecording
+
 exit_flag = False
 
 def extract_local_dict(json_file):
@@ -76,10 +81,10 @@ def startPipes(win:Window):
             plug=PipeCallbackPlug.ON_PAD,
             plugName="sink"
         ))
-        lsb=LiveStreamBuffer(name=f"lsb{output}", bufferSize=2)
+        lsb=LiveStreamBuffer(name=f"lsb{output}", bufferSize=10)
         pipe = GstPipeRunner(appsrc.link(Resize(960,540)).link(lsb).link(sink))
         DA = GstDrawingArea(nvGleSink=sink, defaultSize=(960, 540), defaultPosition=position.pop(0))
-        win.addGstDrawingArea(DA)
+        GLib.idle_add(win.addGstDrawingArea, DA)
         pipes.append(pipe)
         appsrcs.append(appsrc)
         outFPS.printInThread()
@@ -95,24 +100,51 @@ def startPipes(win:Window):
         time.sleep(1)
     for output in outputs:
         outputs[output].start()
-    win.setupButton("Local", changeVisualization, (1820, 980))
+    GLib.idle_add(lambda: win.setupButton("Local", changeVisualization, (1820, 980)))
     GLib.idle_add(win.show_all)
 
 def changeVisualization(button):
     print("Button pressed")
     
     first_key = next(iter(outputs))
-    
+    buttonStr=button.get_label()
     # Check if that first output is "1"
     if outputs[first_key].outStream == 1:
-        # If so, set them ALL to 0
+        button.set_label("Local")
         for key in outputs:
             outputs[key].outStream = 0
     else:
-        # Otherwise, set them ALL to 1
+        button.set_label("Remote")
         for key in outputs:
             outputs[key].outStream = 1
 
+def setupRecording(localUrls: Dict[str, str]):
+    listUrls = list(localUrls.values())
+    recorder=SetupRecording(urls=listUrls,destinationFolder="/home/item/Recordings",ips=list(localUrls.keys()))
+    return recorder
+
+def httpServerSetup():
+    recorder = setupRecording(everyLocalUrl)
+    wrapped_callback = partial(saveBufferZip, recorder)
+    httpServer = HttpGETServer(pathFileToBeDownloaded=['/home/item/Recordings.zip'],callback=[wrapped_callback],downloadRule=["/rec"],port=8080)
+    httpServer.startInThread()
+
+def saveBufferZip(recorder):
+    recorder.saveBuffer()
+    pathFolderToBeZip = "/home/item/Recordings"
+    pathZip = "/home/item/Recordings.zip"
+    with ZipFile(pathZip, 'w') as zipObj:
+        for folderName, subfolders, filenames in os.walk(pathFolderToBeZip):
+            for filename in filenames:
+                filePath = os.path.join(folderName, filename)
+                zipObj.write(filePath, os.path.relpath(filePath, pathFolderToBeZip))
+    #Clean Recordings folder of its file maintaining the folder and delete zip file
+    for folderName, subfolders, filenames in os.walk(pathFolderToBeZip):
+        for filename in filenames:
+            filePath = os.path.join(folderName, filename)
+            os.remove(filePath)
+    
+    
 SNc = SNChecker(folderToClear="/home/item/Ficep_sept24",
               SNpath="/home/item/glibc-2.28/benchtests/strcoll-inputs/SN.txt")
 SNc.check()
@@ -131,4 +163,5 @@ win = Window("Basic Rtsp Pipe", defaultSize=(1920, 1080), defaultPosition=(0, 0)
 win.start()
 setupThread = Thread(target=startPipes, args=(win,), daemon=True)
 setupThread.start()
+httpServerSetup()
 Gtk.main()

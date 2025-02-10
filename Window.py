@@ -51,12 +51,10 @@ class Window(UndecoratedWindow):
 
     def on_drawingarea_press(self, widget, event):
         if self.fullscreen_DA == widget:
-            # If already fullscreen, restore it
             self.normalDA()
         else:
-            # Otherwise, expand this one to fullscreen
             self.fullscreenDA(widget)
-        return False  # Stop further handling
+        return True 
 
     def fullscreenDA(self, drawing_area):
         if drawing_area not in self.drawing_areas:
@@ -97,7 +95,6 @@ class Window(UndecoratedWindow):
             drawing_area.queue_draw()
 
     def ensure_overlay_on_top(self):
-        """Forces the overlay to remain the top widget in the fixed container."""
         if self.overlay.get_parent() is not None:
             self.box.remove(self.overlay)
             self.box.put(self.overlay, 0, 0)
@@ -123,7 +120,8 @@ class Window(UndecoratedWindow):
 
         button.connect("clicked", callback)
         self.addButton(button, position)
-        return button
+        self.show_all()
+        
 
     def quit_app(self, button):
         """Close the GTK main loop."""
