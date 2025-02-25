@@ -61,7 +61,10 @@ class Recorder:
             else:
                 self.buffer = self.bufferGen.getDirtyBuffer()
             self.caps = self.bufferGen.getSampleCaps()
-            print(f"[{self.ip}] Buffering stopped, captured {len(self.buffer)} frames")
+            if not self.buffer or len(self.buffer) == 0:
+                print(f"[{self.ip}] No frames recorded during buffer time.")
+            else:
+                print(f"[{self.ip}] Buffered {len(self.buffer)} frames.")
 
     def capturePostEventFrames(self):
         print(f"[{self.ip}] Capturing post-event frames for {self.postTime} sec")

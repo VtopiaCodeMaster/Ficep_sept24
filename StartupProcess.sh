@@ -3,7 +3,7 @@
 echo "Displaying image..." | tee -a /tmp/script.log
 unclutter -idle 0.1 -jitter 3 -root -noevents &
 # Path to your image
-IMAGE_PATH="/home/item/Ficep_sept24/Ficep_Logo.png"
+IMAGE_PATH="/home/item/Ficep_sept24/Data/Ficep_Logo.png"
 
 # Display the image using feh in fullscreen mode with no decorations
 feh -FZ --no-menu "$IMAGE_PATH" &

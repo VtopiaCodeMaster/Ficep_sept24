@@ -110,18 +110,7 @@ class Window(UndecoratedWindow):
 
         # Ensure it's on top
         self.ensure_overlay_on_top()
-        return button
-
-    def setupButton(self, label, callback, position):
-        """Creates a button, connects its callback, and adds it to the overlay."""
-        button = Gtk.Button(label=label)
-        # Allow the button to receive mouse/touch events explicitly
-        button.add_events(Gdk.EventMask.BUTTON_PRESS_MASK | Gdk.EventMask.TOUCH_MASK)
-
-        button.connect("clicked", callback)
-        self.addButton(button, position)
-        self.show_all()
-        
+        return button    
 
     def quit_app(self, button):
         """Close the GTK main loop."""

@@ -7,11 +7,11 @@ from gi.repository import Gst, GLib
 import threading
 
 class SetupRecording():
-    def __init__(self, urls, destinationFolder,ips):
+    def __init__(self, urls, destinationFolder,ips,fps=25,preTime=30):
         self.recorders = []
-        fps = 25
+        fps = fps
         self.destinationFolder = destinationFolder
-        preTime = 20    # seconds to buffer before trigger
+        preTime = preTime    # seconds to buffer before trigger
         postTime = 0    # seconds to capture after trigger (set to 0 if not used)
         
         # Create a Recorder instance for each URL.
