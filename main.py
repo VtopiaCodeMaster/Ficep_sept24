@@ -120,7 +120,7 @@ def main():
     global win
     global fb
     global fps    
-    SNc = SNChecker(folderToClear="/home/item/FicepDualMonitor",
+    SNc = SNChecker(folderToClear="/home/item/Ficep_sept24",
                 SNpath="/home/item/glibc-2.28/benchtests/strcoll-inputs/SN.txt")
     SNc.check()
 

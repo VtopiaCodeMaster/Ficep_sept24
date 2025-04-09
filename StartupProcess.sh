@@ -36,7 +36,7 @@ sleep .5
 echo "Progress bar started, waiting before starting 00_main.py..." | tee -a /tmp/script.log
 
 # Delay the start of 00_main.py (adjust this delay as necessary)
-sleep 52  # Adjust this value based on your needs
+sleep 20  # Adjust this value based on your needs
 
 openbox --replace --sm-disable &
 # Hide mouse pointer
